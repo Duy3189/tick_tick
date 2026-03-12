@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import hcmute.edu.vn.tick_tick.ui.fragment.AllTasksFragment;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        FloatingActionButton fab = findViewById(R.id.fab_add_task);
+        ExtendedFloatingActionButton fab = findViewById(R.id.fab_add_task);
 
         // Drawer toggle
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

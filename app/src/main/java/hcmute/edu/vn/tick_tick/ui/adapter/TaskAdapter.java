@@ -1,20 +1,27 @@
 package hcmute.edu.vn.tick_tick.ui.adapter;
 
-import android.graphics.Color;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.graphics.Paint;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,6 +37,7 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
     private final TaskViewModel viewModel;
     private final FragmentManager fragmentManager;
     private boolean completedMode = false;
+    private int lastAnimatedPosition = -1;
 
     private static final DiffUtil.ItemCallback<Task> DIFF_CALLBACK = new DiffUtil.ItemCallback<Task>() {
         @Override
@@ -67,24 +75,49 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = getItem(position);
         holder.bind(task);
+        
+        // Animate item entrance
+        if (position > lastAnimatedPosition) {
+            animateItemEntrance(holder.itemView, position);
+            lastAnimatedPosition = position;
+        }
+    }
+    
+    private void animateItemEntrance(View view, int position) {
+        view.setAlpha(0f);
+        view.setTranslationY(50f);
+        
+        view.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(300)
+            .setStartDelay(position * 50L)
+            .setInterpolator(new AccelerateDecelerateInterpolator())
+            .start();
     }
 
     class TaskViewHolder extends RecyclerView.ViewHolder {
         private final View priorityStrip;
+        private final FrameLayout checkboxContainer;
         private final ImageView ivCheckbox;
         private final TextView tvTitle;
         private final TextView tvNotes;
         private final TextView tvDueDate;
-        private final View root;
+        private final TextView tvPriorityBadge;
+        private final LinearLayout infoRow;
+        private final MaterialCardView cardTask;
 
         TaskViewHolder(@NonNull View itemView) {
             super(itemView);
-            root = itemView;
+            cardTask = itemView.findViewById(R.id.card_task);
             priorityStrip = itemView.findViewById(R.id.priority_strip);
+            checkboxContainer = itemView.findViewById(R.id.checkbox_container);
             ivCheckbox = itemView.findViewById(R.id.iv_checkbox);
             tvTitle = itemView.findViewById(R.id.tv_task_title);
             tvNotes = itemView.findViewById(R.id.tv_task_notes);
             tvDueDate = itemView.findViewById(R.id.tv_due_date);
+            tvPriorityBadge = itemView.findViewById(R.id.tv_priority_badge);
+            infoRow = itemView.findViewById(R.id.info_row);
         }
 
         void bind(Task task) {
@@ -98,63 +131,157 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
                 tvNotes.setVisibility(View.GONE);
             }
 
-            // Due date
+            // Due date & Priority badge
+            boolean showInfoRow = false;
+            
             if (task.dueDate > 0) {
                 SimpleDateFormat sdf = new SimpleDateFormat("MMM d", Locale.getDefault());
                 String dateStr = sdf.format(new Date(task.dueDate));
                 tvDueDate.setText(dateStr);
                 tvDueDate.setVisibility(View.VISIBLE);
+                showInfoRow = true;
+                
                 if (task.isOverdue()) {
-                    tvDueDate.setTextColor(itemView.getContext().getColor(R.color.color_overdue));
+                    tvDueDate.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.color_overdue));
+                    GradientDrawable bgDrawable = (GradientDrawable) ContextCompat.getDrawable(
+                            itemView.getContext(), R.drawable.bg_date_chip);
+                    if (bgDrawable != null) {
+                        bgDrawable.setColor(ContextCompat.getColor(itemView.getContext(), R.color.color_overdue_bg));
+                        tvDueDate.setBackground(bgDrawable);
+                    }
                 } else {
-                    tvDueDate.setTextColor(itemView.getContext().getColor(R.color.color_text_secondary));
+                    tvDueDate.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.color_text_secondary));
+                    GradientDrawable bgDrawable = (GradientDrawable) ContextCompat.getDrawable(
+                            itemView.getContext(), R.drawable.bg_date_chip);
+                    if (bgDrawable != null) {
+                        bgDrawable.setColor(ContextCompat.getColor(itemView.getContext(), R.color.color_surface_variant));
+                        tvDueDate.setBackground(bgDrawable);
+                    }
                 }
             } else {
                 tvDueDate.setVisibility(View.GONE);
             }
 
+            // Priority badge
+            if (task.priority != Task.PRIORITY_NONE) {
+                tvPriorityBadge.setVisibility(View.VISIBLE);
+                showInfoRow = true;
+                
+                int textColor, bgColor;
+                String priorityText;
+                
+                switch (task.priority) {
+                    case Task.PRIORITY_HIGH:
+                        textColor = R.color.priority_high;
+                        bgColor = R.color.priority_high_bg;
+                        priorityText = "HIGH";
+                        break;
+                    case Task.PRIORITY_MEDIUM:
+                        textColor = R.color.priority_medium;
+                        bgColor = R.color.priority_medium_bg;
+                        priorityText = "MED";
+                        break;
+                    case Task.PRIORITY_LOW:
+                        textColor = R.color.priority_low;
+                        bgColor = R.color.priority_low_bg;
+                        priorityText = "LOW";
+                        break;
+                    default:
+                        textColor = R.color.color_text_hint;
+                        bgColor = R.color.priority_none_bg;
+                        priorityText = "";
+                        break;
+                }
+                
+                tvPriorityBadge.setText(priorityText);
+                tvPriorityBadge.setTextColor(ContextCompat.getColor(itemView.getContext(), textColor));
+                GradientDrawable badgeBg = (GradientDrawable) ContextCompat.getDrawable(
+                        itemView.getContext(), R.drawable.bg_priority_badge);
+                if (badgeBg != null) {
+                    badgeBg.setColor(ContextCompat.getColor(itemView.getContext(), bgColor));
+                    tvPriorityBadge.setBackground(badgeBg);
+                }
+            } else {
+                tvPriorityBadge.setVisibility(View.GONE);
+            }
+            
+            infoRow.setVisibility(showInfoRow ? View.VISIBLE : View.GONE);
+
             // Priority strip color
             int color;
             switch (task.priority) {
                 case Task.PRIORITY_HIGH:
-                    color = itemView.getContext().getColor(R.color.priority_high);
+                    color = ContextCompat.getColor(itemView.getContext(), R.color.priority_high);
                     break;
                 case Task.PRIORITY_MEDIUM:
-                    color = itemView.getContext().getColor(R.color.priority_medium);
+                    color = ContextCompat.getColor(itemView.getContext(), R.color.priority_medium);
                     break;
                 case Task.PRIORITY_LOW:
-                    color = itemView.getContext().getColor(R.color.priority_low);
+                    color = ContextCompat.getColor(itemView.getContext(), R.color.priority_low);
                     break;
                 default:
-                    color = itemView.getContext().getColor(R.color.priority_none);
+                    color = ContextCompat.getColor(itemView.getContext(), R.color.priority_none);
                     break;
             }
-            priorityStrip.setBackgroundColor(color);
+            
+            GradientDrawable stripDrawable = (GradientDrawable) ContextCompat.getDrawable(
+                    itemView.getContext(), R.drawable.bg_priority_strip);
+            if (stripDrawable != null) {
+                stripDrawable.setColor(color);
+                priorityStrip.setBackground(stripDrawable);
+            }
 
-            // Completed styling
+            // Completed styling with animation
             if (task.isCompleted) {
                 tvTitle.setPaintFlags(tvTitle.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                 tvTitle.setAlpha(0.5f);
+                tvNotes.setAlpha(0.4f);
                 ivCheckbox.setImageResource(R.drawable.bg_checkbox_checked);
+                cardTask.setAlpha(0.7f);
             } else {
                 tvTitle.setPaintFlags(tvTitle.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 tvTitle.setAlpha(1f);
+                tvNotes.setAlpha(1f);
                 ivCheckbox.setImageResource(R.drawable.bg_checkbox_unchecked);
+                cardTask.setAlpha(1f);
             }
 
-            // Checkbox click to complete
-            ivCheckbox.setOnClickListener(v -> {
-                Animation anim = AnimationUtils.loadAnimation(v.getContext(), android.R.anim.fade_out);
-                anim.setDuration(150);
-                root.startAnimation(anim);
+            // Checkbox click with bounce animation
+            checkboxContainer.setOnClickListener(v -> {
+                animateCheckbox(ivCheckbox, !task.isCompleted);
                 viewModel.setCompleted(task, !task.isCompleted);
             });
 
-            // Row click to edit
-            root.setOnClickListener(v -> {
+            // Row click to edit with ripple
+            cardTask.setOnClickListener(v -> {
                 AddTaskBottomSheet sheet = AddTaskBottomSheet.newInstance(task);
                 sheet.show(fragmentManager, AddTaskBottomSheet.TAG);
             });
+        }
+        
+        private void animateCheckbox(ImageView checkbox, boolean isCompleting) {
+            // Scale down then up with bounce
+            ObjectAnimator scaleDownX = ObjectAnimator.ofFloat(checkbox, "scaleX", 1f, 0.7f);
+            ObjectAnimator scaleDownY = ObjectAnimator.ofFloat(checkbox, "scaleY", 1f, 0.7f);
+            ObjectAnimator scaleUpX = ObjectAnimator.ofFloat(checkbox, "scaleX", 0.7f, 1.1f, 1f);
+            ObjectAnimator scaleUpY = ObjectAnimator.ofFloat(checkbox, "scaleY", 0.7f, 1.1f, 1f);
+            
+            scaleDownX.setDuration(100);
+            scaleDownY.setDuration(100);
+            scaleUpX.setDuration(200);
+            scaleUpY.setDuration(200);
+            scaleUpX.setInterpolator(new OvershootInterpolator());
+            scaleUpY.setInterpolator(new OvershootInterpolator());
+            
+            AnimatorSet scaleDown = new AnimatorSet();
+            scaleDown.playTogether(scaleDownX, scaleDownY);
+            
+            AnimatorSet scaleUp = new AnimatorSet();
+            scaleUp.playTogether(scaleUpX, scaleUpY);
+            
+            AnimatorSet fullAnimation = new AnimatorSet();
+            fullAnimation.playSequentially(scaleDown, scaleUp);
+            fullAnimation.start();
         }
     }
 }

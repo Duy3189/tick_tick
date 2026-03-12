@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/color_toolbar"
-            app:elevation="4dp">
+            app:elevation="0dp">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
@@ -26,9 +26,10 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/color_toolbar"
                 app:titleTextColor="@color/white"
-                app:subtitleTextColor="@color/color_accent_light"
+                app:titleTextAppearance="@style/TextAppearance.Modern.AppTitle"
+                app:subtitleTextColor="@color/color_primary_light"
                 app:navigationIconTint="@color/white"
-                app:layout_scrollFlags="scroll|enterAlways" />
+                app:layout_scrollFlags="scroll|enterAlways|snap" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -38,33 +39,40 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
-            android:paddingBottom="64dp" />
+            android:paddingBottom="80dp" />
 
-        <!-- FAB -->
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
+        <!-- FAB with modern positioning -->
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/fab_add_task"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/cd_add_task"
-            android:src="@drawable/ic_add"
-            app:backgroundTint="@color/color_accent"
-            app:tint="@color/white"
-            app:elevation="8dp"
-            android:layout_margin="16dp"
+            android:text="Add Task"
+            android:textColor="@color/white"
+            app:icon="@drawable/ic_add"
+            app:backgroundTint="@color/color_primary"
+            app:iconTint="@color/white"
+            app:elevation="12dp"
+            app:shapeAppearance="@style/ShapeAppearance.Modern.FAB"
+            android:layout_margin="20dp"
             app:layout_anchor="@id/bottom_navigation"
-            app:layout_anchorGravity="top|end" />
+            app:layout_anchorGravity="top|end"
+            app:rippleColor="@color/color_ripple" />
 
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/bottom_navigation"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@color/color_bottom_nav_bg"
+            android:background="@drawable/bg_bottom_nav"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             app:itemIconTint="@color/nav_item_color"
             app:itemTextColor="@color/nav_item_color"
             app:labelVisibilityMode="labeled"
-            app:elevation="8dp"
+            app:elevation="16dp"
+            app:itemActiveIndicatorStyle="@style/Widget.Modern.BottomNavigation.ActiveIndicator"
             app:menu="@menu/bottom_nav_menu" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
@@ -81,6 +89,7 @@
         app:menu="@menu/drawer_menu"
         app:itemIconTint="@color/color_primary"
         app:itemTextColor="@color/color_text_primary"
-        app:itemBackground="@drawable/nav_item_background" />
+        app:itemBackground="@drawable/nav_item_background"
+        app:itemShapeAppearance="@style/ShapeAppearance.Modern.SmallComponent" />
 
 </androidx.drawerlayout.widget.DrawerLayout>

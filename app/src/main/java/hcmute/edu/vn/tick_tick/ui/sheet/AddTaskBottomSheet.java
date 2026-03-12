@@ -104,20 +104,12 @@ public class AddTaskBottomSheet extends BottomSheetDialogFragment {
             if (tvTitle != null) tvTitle.setText(getString(R.string.edit_task));
         }
 
-        // Date picker
-        btnDatePicker.setOnClickListener(v -> {
-            Calendar cal = selectedDate != null ? selectedDate : Calendar.getInstance();
-            DatePickerDialog dialog = new DatePickerDialog(requireContext(),
-                    (dp, year, month, day) -> {
-                        selectedDate = Calendar.getInstance();
-                        selectedDate.set(year, month, day, 23, 59, 0);
-                        updateDateLabel();
-                    },
-                    cal.get(Calendar.YEAR),
-                    cal.get(Calendar.MONTH),
-                    cal.get(Calendar.DAY_OF_MONTH));
-            dialog.show();
-        });
+        // Date picker - now on the card
+        View cardDatePicker = view.findViewById(R.id.card_date_picker);
+        if (cardDatePicker != null) {
+            cardDatePicker.setOnClickListener(v -> showDatePicker());
+        }
+        btnDatePicker.setOnClickListener(v -> showDatePicker());
 
         // Priority chips
         priorityChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
@@ -138,11 +130,25 @@ public class AddTaskBottomSheet extends BottomSheetDialogFragment {
         etTitle.requestFocus();
     }
 
+    private void showDatePicker() {
+        Calendar cal = selectedDate != null ? selectedDate : Calendar.getInstance();
+        DatePickerDialog dialog = new DatePickerDialog(requireContext(),
+                (dp, year, month, day) -> {
+                    selectedDate = Calendar.getInstance();
+                    selectedDate.set(year, month, day, 23, 59, 0);
+                    updateDateLabel();
+                },
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH),
+                cal.get(Calendar.DAY_OF_MONTH));
+        dialog.show();
+    }
+
     private void updateDateLabel() {
         if (selectedDate != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d", Locale.getDefault());
             tvDueDateLabel.setText(sdf.format(selectedDate.getTime()));
-            tvDueDateLabel.setTextColor(requireContext().getColor(R.color.color_accent));
+            tvDueDateLabel.setTextColor(requireContext().getColor(R.color.color_primary));
         }
     }
 
