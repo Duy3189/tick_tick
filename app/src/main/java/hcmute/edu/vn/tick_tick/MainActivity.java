@@ -3,11 +3,10 @@ package hcmute.edu.vn.tick_tick;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageButton;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -16,7 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import hcmute.edu.vn.tick_tick.ui.fragment.AllTasksFragment;
@@ -43,20 +42,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
 
         toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().hide();
+            }
+        }
 
         drawerLayout = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
-        ExtendedFloatingActionButton fab = findViewById(R.id.fab_add_task);
-
-        // Drawer toggle
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawerLayout, toolbar,
-                R.string.nav_my_lists, R.string.nav_my_lists);
-        toggle.getDrawerArrowDrawable().setColor(getColor(R.color.white));
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        FloatingActionButton fab = findViewById(R.id.fab_add_task);
+        
+        // Menu button opens drawer
+        ImageButton btnMenu = findViewById(R.id.btn_menu);
+        if (btnMenu != null) {
+            btnMenu.setOnClickListener(v -> {
+                if (drawerLayout != null) {
+                    drawerLayout.openDrawer(GravityCompat.START);
+                }
+            });
+        }
 
         navigationView.setNavigationItemSelectedListener(this);
 

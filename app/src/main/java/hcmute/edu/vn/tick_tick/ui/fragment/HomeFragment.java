@@ -35,7 +35,7 @@ public class HomeFragment extends Fragment {
     private LinearLayout emptyStateContainer, completedSection;
     private RecyclerView rvTasks, rvCompleted;
     private CircularProgressIndicator progressTasks;
-    private MaterialCardView cardStats;
+    private MaterialCardView cardStats, cardPending;
     
     private int totalTasks = 0;
     private int completedTasks = 0;
@@ -63,6 +63,7 @@ public class HomeFragment extends Fragment {
         rvCompleted = view.findViewById(R.id.rv_completed);
         progressTasks = view.findViewById(R.id.progress_tasks);
         cardStats = view.findViewById(R.id.card_stats);
+        cardPending = view.findViewById(R.id.card_pending);
 
         // Set greeting with animation
         int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
@@ -83,18 +84,31 @@ public class HomeFragment extends Fragment {
         // Set date
         tvDate.setText(DateFormat.format("EEEE, MMMM d", Calendar.getInstance()));
 
+        // Animate pending card
+        if (cardPending != null) {
+            cardPending.setAlpha(0f);
+            cardPending.setTranslationX(-30f);
+            cardPending.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setDuration(400)
+                .setStartDelay(100)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        }
+        
         // Animate stats card
-        cardStats.setAlpha(0f);
-        cardStats.setScaleX(0.95f);
-        cardStats.setScaleY(0.95f);
-        cardStats.animate()
-            .alpha(1f)
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(400)
-            .setStartDelay(100)
-            .setInterpolator(new AccelerateDecelerateInterpolator())
-            .start();
+        if (cardStats != null) {
+            cardStats.setAlpha(0f);
+            cardStats.setTranslationX(30f);
+            cardStats.animate()
+                .alpha(1f)
+                .translationX(0f)
+                .setDuration(400)
+                .setStartDelay(150)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        }
 
         // Task list
         taskAdapter = new TaskAdapter(viewModel, getParentFragmentManager());
