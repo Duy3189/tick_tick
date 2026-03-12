@@ -33,7 +33,9 @@ public class TaskRepository {
     public void insert(Task task, Runnable onSuccess) {
         executor.execute(() -> {
             taskDao.insert(task);
-            if (onSuccess != null) onSuccess.run();
+            if (onSuccess != null) {
+                new android.os.Handler(android.os.Looper.getMainLooper()).post(onSuccess);
+            }
         });
     }
 

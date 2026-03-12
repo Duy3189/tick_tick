@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
+import java.util.Objects;
 import java.util.Date;
 import java.util.Locale;
 
@@ -46,10 +47,10 @@ public class TaskAdapter extends ListAdapter<Task, TaskAdapter.TaskViewHolder> {
         }
         @Override
         public boolean areContentsTheSame(@NonNull Task oldItem, @NonNull Task newItem) {
-            return oldItem.title.equals(newItem.title)
-                    && oldItem.isCompleted == newItem.isCompleted
-                    && oldItem.priority == newItem.priority
-                    && oldItem.dueDate == newItem.dueDate;
+            return Objects.equals(oldItem.title, newItem.title)
+                && oldItem.isCompleted == newItem.isCompleted
+                && oldItem.priority == newItem.priority
+                && oldItem.dueDate == newItem.dueDate;
         }
     };
 

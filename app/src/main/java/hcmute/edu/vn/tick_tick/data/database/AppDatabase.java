@@ -29,13 +29,17 @@ public abstract class AppDatabase extends RoomDatabase {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(
+                        INSTANCE = Room.databaseBuilder(
                             context.getApplicationContext(),
                             AppDatabase.class,
                             "ticktick_database"
-                    )
-                    .addCallback(sRoomDatabaseCallback)
-                    .build();
+                        )
+                        // If schema version mismatch occurs and no Migration is provided,
+                        // fallbackToDestructiveMigration will wipe and recreate the database.
+                        // This avoids the crash shown in logcat but will remove existing data.
+                        .fallbackToDestructiveMigration()
+                        .addCallback(sRoomDatabaseCallback)
+                        .build();
                 }
             }
         }
